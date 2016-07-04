@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Iris.Controllers;
 using Iris.Utils;
 
 namespace Iris.Messages
@@ -10,12 +11,6 @@ namespace Iris.Messages
         {
             get { return NetworkBitConverter.ToInt32(_dgram, BaseHeaderLength); }
             set { NetworkBitConverter.GetBytes(value).CopyTo(_dgram, BaseHeaderLength);  }
-        }
-
-        public AckListMessage SetLastRead(int lastRead)
-        {
-            LastRead = lastRead;
-            return this;
         }
 
         public short AckSize
@@ -47,12 +42,6 @@ namespace Iris.Messages
                 }
                 Size = WithoutFooterLength + 24;
             }
-        }
-
-        public AckListMessage SetAckList(ReadOnlyCollection<int> ackList)
-        {
-            AckList = ackList;
-            return this;
         }
 
         private int WithoutFooterLength => HeaderLength + AckSize*4 + 8;

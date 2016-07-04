@@ -11,12 +11,6 @@ namespace Iris.Messages
             set { NetworkBitConverter.GetBytes(value).CopyTo(_dgram, BaseHeaderLength); }
         }
 
-        public DataMessage SetSequence(int sequence)
-        {
-            Sequence = sequence;
-            return this;
-        }
-
         public short DataLength
         {
             get { return NetworkBitConverter.ToInt16(_dgram, BaseHeaderLength + 4); }
@@ -27,12 +21,6 @@ namespace Iris.Messages
         {
             get { return NetworkBitConverter.ToInt32(_dgram, BaseHeaderLength + 6); }
             set { NetworkBitConverter.GetBytes(value).CopyTo(_dgram, BaseHeaderLength + 6); }
-        }
-
-        public DataMessage SetTimeId(int timeId)
-        {
-            TimeId = timeId;
-            return this;
         }
 
         private const int HeaderLength = BaseHeaderLength + 10;
@@ -51,12 +39,6 @@ namespace Iris.Messages
                 Array.Copy(value, 0, _dgram, HeaderLength, DataLength);
                 Size = HeaderLength + DataLength;
             }
-        }
-
-        public DataMessage SetData(byte[] data)
-        {
-            Data = data;
-            return this;
         }
 
         public DataMessage() { }

@@ -9,6 +9,79 @@ namespace Iris.Messages
         public MessageBase(int size) : base(size) {}
         public MessageBase() {}
         public MessageBase(byte[] dgram) : base(dgram) {}
+
+        //Sorter
+        public static MessageBase FromDgram(byte[] dgram)
+        {
+            return new MessageBase(dgram);
+        }
+
+        public delegate void IsAckListMessageCallback(AckListMessage ackListMessage);
+        public MessageBase IsAckListMessage(IsAckListMessageCallback callback)
+        {
+
+            if (Type == MessageType.AckListMessage)
+            {
+                callback(new AckListMessage(_dgram));
+            }
+
+            return this;
+        }
+
+        public delegate void IsDataMessageCallback(DataMessage dataMessage);
+        public MessageBase IsDataMessage(IsDataMessageCallback callback)
+        {
+            if (Type == MessageType.DataMessage)
+            {
+                callback(new DataMessage(_dgram));
+            }
+
+            return this;
+        }
+
+        public delegate void IsPingMessageCallback(PingMessage pingMessage);
+        public MessageBase IsPingMessage(IsPingMessageCallback callback)
+        {
+            if (Type == MessageType.PingMessage)
+            {
+                callback(new PingMessage(_dgram));
+            }
+
+            return this;
+        }
+
+        public delegate void IsPingMessage2Callback(PingMessage2 pingMessage2);
+        public MessageBase IsPingMessage2(IsPingMessage2Callback callback)
+        {
+            if (Type == MessageType.PingMessage2)
+            {
+                callback(new PingMessage2(_dgram));
+            }
+
+            return this;
+        }
+
+        public delegate void IsCloseConnMessageCallback(CloseConnMessage closeConnMessage);
+        public MessageBase IsCloseConnMessage(IsCloseConnMessageCallback callback)
+        {
+            if (Type == MessageType.CloseConnMessage)
+            {
+                callback(new CloseConnMessage(_dgram));
+            }
+
+            return this;
+        }
+
+        public delegate void IsCloseStreamMessageCallback(CloseStreamMessage closeStreamMessage);
+        public MessageBase IsCloseStreamMessage(IsCloseStreamMessageCallback callback)
+        {
+            if (Type == MessageType.CloseStreamMessage)
+            {
+                callback(new CloseStreamMessage(_dgram));
+            }
+
+            return this;
+        }
     }
 
     public class MessageBase<T> where T: MessageBase<T>
@@ -47,22 +120,10 @@ namespace Iris.Messages
             set { NetworkBitConverter.GetBytes(value).CopyTo(_dgram, 4); }
         }
 
-        public T SetConnectionId(int connectionId)
-        {
-            ConnectionId = connectionId;
-            return (T)this;
-        }
-
         public int ClientId
         {
             get { return NetworkBitConverter.ToInt32(_dgram, 8); }
             set { NetworkBitConverter.GetBytes(value).CopyTo(_dgram, 8); }
-        }
-
-        public T SetClientId(int clientId)
-        {
-            ClientId = clientId;
-            return (T)this;
         }
 
         protected const int BaseHeaderLength = 12;
