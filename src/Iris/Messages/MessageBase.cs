@@ -128,8 +128,6 @@ namespace Iris.Messages
 
         protected const int BaseHeaderLength = 12;
 
-        public IPEndPoint DstHost { get; set; }
-
         protected MessageBase(int size)
         {
             Size = size;

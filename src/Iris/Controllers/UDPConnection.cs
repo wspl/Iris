@@ -10,16 +10,34 @@ namespace Iris.Controllers
 {
     public class UdpConnection
     {
+        public const bool SimulateBadNetwork = true;
+
+        public int ConnectionId => GetHashCode();
+
         private UdpClient Socket { get; }
 
-        public UdpConnection(Gateway gateway)
+        public UdpConnection(int listenPort)
         {
-            Socket = new UdpClient();
+            Socket = new UdpClient(listenPort);
         }
 
-        public Task<int> SendMessage(MessageBase message, IPEndPoint target)
+        public UdpConnection()
         {
-            return Socket.SendAsync(message.Dgram, message.Size, target);
+            Socket = new UdpClient(0, AddressFamily.InterNetwork);
+        }
+
+        public async Task<int> SendMessage<T>(MessageBase<T> message, IPEndPoint target) where T : MessageBase<T>
+        {
+            if (SimulateBadNetwork)
+            {
+                var random = new Random();
+                if (random.Next(0, 100) > 90)
+                {
+                    return 0;
+                }
+                await Task.Delay(random.Next(100, 200));
+            }
+            return await Socket.SendAsync(message.Dgram, message.Size, target);
         }
 
         public async Task HandleReceiveMessage()

@@ -2,7 +2,7 @@
 
 namespace Iris.Messages
 {
-    public class PingMessage2 : MessageBase<PingMessage>
+    public class PingMessage2 : MessageBase<PingMessage2>
     {
         public int PingId
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Iris.Messages;
 
 namespace Iris.Controllers
 {
@@ -12,6 +13,11 @@ namespace Iris.Controllers
         public Sender(ClientControl client)
         {
             Client = client;
+        }
+
+        public async Task<int> Send<T>(MessageBase<T> message) where T : MessageBase<T>
+        {
+            return await Client.Conn.SendMessage(message, Client.DstPoint);
         }
     }
 }

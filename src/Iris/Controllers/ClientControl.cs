@@ -10,22 +10,37 @@ namespace Iris.Controllers
     {
         // Base property
         public int ClientId { get; set; }
+        public int ConnectionId => Gateway.Conn.ConnectionId;
         public IPEndPoint DstPoint { get; set; }
 
-        // Sub controllers
+        public bool IsAlive { get; set; } = false;
+
+        // Parent controllers
+        public Gateway Gateway { get; set; }
+
+        // Child controllers
         public UdpConnection Conn { get; set; }
-        public Receiver Receiver { get; private set; }
-        public Sender Sender { get; private set; }
+        public Receiver Receiver { get; }
+        public Sender Sender { get; }
 
         // Network controllers
-        private PingControl Pinger { get; }
+        public PingManager PingManager { get; }
+
+        // Network paramters
+        public int DownloadRate { get; set; }
+        public int UploadRate { get; set; }
 
         public ClientControl()
         {
             Receiver = new Receiver(this);
             Sender = new Sender(this);
 
-            Pinger = new PingControl(this);
+            PingManager = new PingManager(this);
+        }
+
+        public async Task StartClient()
+        {
+            await PingManager.Run();
         }
     }
 }

@@ -9,5 +9,8 @@ namespace Iris
     {
         public const short ProtocolVersion = 1;
         public const int MaxPacketSize = 1500;
+
+        public const int UploadRate = 1000000;
+        public const int DownloadRate = 100000;
     }
 }
