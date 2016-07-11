@@ -141,6 +141,7 @@ namespace Iris.Messages
         protected MessageBase(byte[] dgram)
         {
             _dgram = dgram;
+            Size = dgram.Length;
         }
     }
 

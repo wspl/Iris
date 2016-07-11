@@ -23,7 +23,7 @@ namespace Iris.Controllers
 
         public async Task Run()
         {
-            var timer = new Timer()
+            var timer = new Timer
             {
                 Enabled = true,
                 Interval = 1000 * 1000 * 10
@@ -41,9 +41,8 @@ namespace Iris.Controllers
                 DownloadRate = TransmissionConfig.DownloadRate,
                 UploadRate = TransmissionConfig.UploadRate,
             };
-            message.PingId = message.GetHashCode();
 
-            PingTable.Add(message.PingId, DateTimeUtils.GetTimeStamp());
+            PingTable.Add(message.PingId, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
             await Client.Sender.Send(message);
         }
@@ -73,9 +72,14 @@ namespace Iris.Controllers
 
         public void OnRespond(PingMessage2 message)
         {
-            var delay = (int)(DateTimeUtils.GetTimeStamp() - PingTable[message.PingId]);
+            var delay = (int)(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - PingTable[message.PingId]);
             DelayTable.Add(message.PingId, delay);
 
+            if (Client.ClientId == 0)
+            {
+                Console.WriteLine($"Connection created with clientId={message.ClientId}");
+                Client.ClientId = message.ClientId;
+            }
             Console.WriteLine($"RTT {delay}ms");
         }
     }

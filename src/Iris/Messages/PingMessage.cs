@@ -24,7 +24,10 @@ namespace Iris.Messages
 
         private const int HeaderLength = BaseHeaderLength + 12;
 
-        public PingMessage() : base(HeaderLength) { }
+        public PingMessage() : base(HeaderLength)
+        {
+            PingId = BinaryUtils.NewHashCode();
+        }
         public PingMessage(byte[] dgram) : base(dgram) { }
     }
 }

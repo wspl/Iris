@@ -31,7 +31,7 @@ namespace Iris.Controllers
             if (SimulateBadNetwork)
             {
                 var random = new Random();
-                if (random.Next(0, 100) > 90)
+                if (random.Next(0, 100) > 95)
                 {
                     return 0;
                 }

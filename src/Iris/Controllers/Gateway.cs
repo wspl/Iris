@@ -20,7 +20,7 @@ namespace Iris.Controllers
 
         private readonly Dictionary<int, ClientControl> _clientTable = new Dictionary<int, ClientControl>();
 
-        private int _localClientId { get; set; }
+        private ClientControl LocalClient { get; }
 
         /// <summary>
         /// Create gateway as client
@@ -36,13 +36,12 @@ namespace Iris.Controllers
             var client = new ClientControl
             {
                 Gateway = this,
-                ClientId = new Random().Next(),
+                ClientId = 0,
                 Conn = Conn,
                 DstPoint = remoteServer
             };
 
-            _localClientId = client.ClientId;
-            _clientTable.Add(client.ClientId, client);
+            LocalClient = client;
         }
 
         /// <summary>
@@ -61,7 +60,7 @@ namespace Iris.Controllers
         {
             if (LocalType == LocalTypes.Client)
             {
-                await Task.WhenAll(_clientTable[_localClientId].StartClient(), Conn.HandleReceiveMessage());
+                await Task.WhenAll(LocalClient.StartClient(), Conn.HandleReceiveMessage());
             }
         }
 
@@ -69,7 +68,7 @@ namespace Iris.Controllers
         {
             if (LocalType == LocalTypes.Server)
             {
-                await Conn.HandleReceiveMessage();
+                await Task.WhenAll(LocalClient.StartServer(), Conn.HandleReceiveMessage());
             }
         }
 
@@ -80,18 +79,31 @@ namespace Iris.Controllers
         /// <param name="result"></param>
         public void OnReceiveBypass(MessageBase message, UdpReceiveResult result)
         {
-            if (!_clientTable.ContainsKey(message.ClientId))
+            if (LocalType == LocalTypes.Server)
             {
-                var client = new ClientControl
+                if (!_clientTable.ContainsKey(message.ClientId))
                 {
-                    Gateway = this,
-                    ClientId = message.ClientId,
-                    Conn = Conn,
-                    DstPoint = result.RemoteEndPoint
-                };
-                _clientTable.Add(message.ClientId, client);
+                    var client = new ClientControl
+                    {
+                        Gateway = this,
+                        ClientId = message.ClientId,
+                        Conn = Conn,
+                        DstPoint = result.RemoteEndPoint
+                    };
+                    // If message.ClientId is zero, clientControl will generated a clientId automantically.
+                    _clientTable.Add(message.ClientId, client);
+                }
+                _clientTable[message.ClientId].Receiver.OnReceive(message);
             }
-            _clientTable[message.ClientId].Receiver.OnReceive(message);
+            else if (LocalType == LocalTypes.Client)
+            {
+                // Connection created when first receive PingMessage2
+                if (LocalClient.ClientId == 0 && message.Type == MessageType.PingMessage2)
+                {
+                    LocalClient.ClientId = message.ClientId;
+                }
+                LocalClient.Receiver.OnReceive(message);
+            }
         }
     }
 }
